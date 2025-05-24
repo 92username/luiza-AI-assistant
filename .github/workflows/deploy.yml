@@ -1,0 +1,33 @@
+name: Deploy Luiza
+
+on:
+  push:
+    branches:
+      - main  # ou a branch que você usa pra produção
+    paths-ignore:
+      - '**.md'
+      - 'LICENSE'
+      
+  workflow_dispatch:
+jobs:
+  deploy:
+    name: Deploy via SSH
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v3
+
+      - name: Conectar na VPS e redeploy
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_DEPLOY_KEY }}
+          script: |
+            docker pull user92/luiza-backend:latest
+            docker rm -f luiza-backend || true
+            docker run -d \
+              --name luiza-backend \
+              -p 8000:8000 \
+              user92/luiza-backend:latest
