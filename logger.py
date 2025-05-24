@@ -44,6 +44,7 @@ console_handler.setFormatter(logging.Formatter(LOG_FORMAT, DATE_FORMAT))
 logger.addHandler(file_handler)
 logger.addHandler(console_handler)
 
+
 # Convenience functions
 def info(message):
     """Log an info level message"""
@@ -65,6 +66,7 @@ def error(message, exc_info=False):
     """
     logger.error(message, exc_info=exc_info)
 
+
 # Cria o cabeçalho do CSV se o arquivo não existir
 if not os.path.exists(CONVERSAS_CSV_PATH):
     # Ensure the 'logs' directory itself exists
@@ -73,9 +75,17 @@ if not os.path.exists(CONVERSAS_CSV_PATH):
         writer = csv.writer(csvfile)
         writer.writerow(["Timestamp", "Score", "Pergunta", "Resposta"])
 
+
 def log_conversa(score, pergunta, resposta):
     """Loga a conversa em CSV com timestamp, score, pergunta e resposta"""
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     with open(CONVERSAS_CSV_PATH, mode="a", newline="", encoding="utf-8") as csvfile:
         writer = csv.writer(csvfile)
-        writer.writerow([timestamp, round(score, 4) if score is not None else "N/A", pergunta, resposta])
+        writer.writerow(
+            [
+                timestamp,
+                round(score, 4) if score is not None else "N/A",
+                pergunta,
+                resposta,
+            ]
+        )

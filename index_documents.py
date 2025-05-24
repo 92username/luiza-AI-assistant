@@ -1,4 +1,5 @@
 import os
+
 """
 Este script indexa documentos Markdown para um sistema de recuperação de texto usando Langchain e OpenAI.
 
@@ -25,11 +26,11 @@ Saída:
     Os embeddings são armazenados no diretório ./chroma_index
 """
 from dotenv import load_dotenv
-from langchain_community.document_loaders import DirectoryLoader # Updated import
+from langchain_community.document_loaders import DirectoryLoader  # Updated import
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain_community.vectorstores import Chroma # Updated import
-from langchain_openai import OpenAIEmbeddings # Updated import
-from pydantic import SecretStr # Added import
+from langchain_community.vectorstores import Chroma  # Updated import
+from langchain_openai import OpenAIEmbeddings  # Updated import
+from pydantic import SecretStr  # Added import
 
 # Carregar variáveis do .env
 load_dotenv()
@@ -37,14 +38,18 @@ load_dotenv()
 # Verificar se a API KEY está disponível
 api_key_str = os.getenv("OPENAI_API_KEY")
 if not api_key_str:
-    raise EnvironmentError("Variável OPENAI_API_KEY não encontrada. Verifique seu .env.")
-api_key_secret = SecretStr(api_key_str) # Use SecretStr
+    raise EnvironmentError(
+        "Variável OPENAI_API_KEY não encontrada. Verifique seu .env."
+    )
+api_key_secret = SecretStr(api_key_str)  # Use SecretStr
 
 if __name__ == "__main__":
     # Carregar documentos da pasta /docs
     docs_path = "./docs"
     if not os.path.exists(docs_path):
-        raise FileNotFoundError("Pasta ./docs não encontrada. Crie a pasta e adicione arquivos .md.")
+        raise FileNotFoundError(
+            "Pasta ./docs não encontrada. Crie a pasta e adicione arquivos .md."
+        )
 
     print("📄 Carregando arquivos Markdown...")
     # 1.1 Carrega todos os .md de /docs
@@ -55,9 +60,7 @@ if __name__ == "__main__":
     print(f"📃 {len(raw_documents)} documentos carregados. Fragmentando...")
     # 1.2 Configura o splitter
     text_splitter = RecursiveCharacterTextSplitter(
-        chunk_size=500,
-        chunk_overlap=100,
-        separators=["\\n\\n", "\\n", ".", " "]
+        chunk_size=500, chunk_overlap=100, separators=["\\n\\n", "\\n", ".", " "]
     )
     # 1.3 Gera os chunks
     documents = text_splitter.split_documents(raw_documents)
@@ -66,7 +69,7 @@ if __name__ == "__main__":
     print("🏷️ Atribuindo metadados 'tema'...")
     for doc in documents:
         src = doc.metadata["source"]  # ex: "docs/03-proposta-de-valor-e-mvp.md"
-        filename = os.path.basename(src) # ex: "03-proposta-de-valor-e-mvp.md"
+        filename = os.path.basename(src)  # ex: "03-proposta-de-valor-e-mvp.md"
         if filename.startswith("01-"):
             doc.metadata["tema"] = "visao-geral"
         elif filename.startswith("02-"):
@@ -80,18 +83,17 @@ if __name__ == "__main__":
         else:
             doc.metadata["tema"] = None
 
-
     # Criar os embeddings e armazenar no Chroma
     print("🧠 Gerando embeddings com OpenAI...")
     # 3.1 Cria embeddings
-    embedding = OpenAIEmbeddings(api_key=api_key_secret, model="text-embedding-ada-002") # Updated model and use SecretStr
+    embedding = OpenAIEmbeddings(
+        api_key=api_key_secret, model="text-embedding-ada-002"
+    )  # Updated model and use SecretStr
 
     print("📦 Persistindo índice no diretório ./chroma_db ...")
     # 3.2 Monta o Chroma
     vectordb = Chroma.from_documents(
-        documents=documents,
-        embedding=embedding,
-        persist_directory="./chroma_db"
+        documents=documents, embedding=embedding, persist_directory="./chroma_db"
     )
     # 3.3 Persiste em disco
     vectordb.persist()

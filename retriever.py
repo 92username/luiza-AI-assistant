@@ -22,11 +22,11 @@ except ImportError:
     error = logger.error
 
 try:
-    from langchain_community.embeddings import OpenAIEmbeddings # Updated import
-    from langchain_community.vectorstores import Chroma          # Updated import
+    from langchain_community.embeddings import OpenAIEmbeddings  # Updated import
+    from langchain_community.vectorstores import Chroma  # Updated import
 
 except ImportError:
-    error_msg = "Required packages not installed. Please run: pip install langchain-openai langchain-community langchain-core" # Adjusted error message slightly
+    error_msg = "Required packages not installed. Please run: pip install langchain-openai langchain-community langchain-core"  # Adjusted error message slightly
     try:
         error(error_msg)
     except (NameError, AttributeError) as e:
@@ -62,8 +62,8 @@ def load_docs(query: str, k: int = 5, score_threshold: float = 0.65) -> List[Doc
         raise ValueError("OPENAI_API_KEY not found")
 
     # Path to the persisted Chroma database
-    chroma_dir = "./chroma_index" # Assuming this path is correct and DB exists.
-                                  # Previous version had an explicit check.
+    chroma_dir = "./chroma_index"  # Assuming this path is correct and DB exists.
+    # Previous version had an explicit check.
 
     # Initialize the embedding model
     embeddings = OpenAIEmbeddings()
@@ -84,10 +84,16 @@ def load_docs(query: str, k: int = 5, score_threshold: float = 0.65) -> List[Doc
     filtered_docs = [doc for doc, score in docs_and_scores if score >= score_threshold]
 
     if not filtered_docs:
-        warning(f"Nenhum documento acima do threshold ({score_threshold}) para a query: '{query}'")
-        raise FileNotFoundError(f"Nenhum documento relevante com score >= {score_threshold}")
+        warning(
+            f"Nenhum documento acima do threshold ({score_threshold}) para a query: '{query}'"
+        )
+        raise FileNotFoundError(
+            f"Nenhum documento relevante com score >= {score_threshold}"
+        )
 
-    info(f"Busca concluída. Encontrados {len(filtered_docs)} documentos relevantes após filtro (threshold={score_threshold}).")
+    info(
+        f"Busca concluída. Encontrados {len(filtered_docs)} documentos relevantes após filtro (threshold={score_threshold})."
+    )
     return filtered_docs
 
 

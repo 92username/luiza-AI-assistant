@@ -15,11 +15,6 @@
 
 Luiza é uma assistente virtual inteligente que utiliza **RAG (Retrieval-Augmented Generation)** com **LangChain** e **OpenAI** para responder perguntas baseadas em documentos internos da EstudaMais.tech. Seu objetivo é oferecer suporte contextualizado sobre a plataforma, produtos e iniciativas como o GitHub Student Pack (GHSP).
 
-
-# Luiza — IA Assistente da EstudaMais.tech
-
-Luiza é uma assistente virtual inteligente que utiliza **RAG (Retrieval-Augmented Generation)** com **LangChain** e **OpenAI** para responder perguntas baseadas em documentos internos da EstudaMais.tech. Seu objetivo é oferecer suporte contextualizado sobre a plataforma, produtos e iniciativas como o GitHub Student Pack (GHSP).
-
 ## 📌 O que é este projeto?
 
 Este projeto implementa um sistema de **perguntas e respostas com base em contexto interno** (arquivos `.md`), acessível via API FastAPI. As respostas são geradas utilizando **LLM da OpenAI**, com suporte à busca vetorial em uma base indexada com **ChromaDB**.
