@@ -3,3 +3,4 @@
 __pycache__/
 chroma_index/
 logs/
+chroma_db/
