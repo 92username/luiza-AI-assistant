@@ -1,20 +1,28 @@
-# filepath: /home/nbx/Documents/Projects/luizaFastAPI/luizaFastAPI.py
-from fastapi import FastAPI, Request
-from pydantic import BaseModel, SecretStr
+"""
+API FastAPI para a Luiza, assistente virtual da EstudaMais.tech.
+
+Este módulo implementa um serviço de chatbot usando FastAPI com LangChain e 
+retrieval-augmented generation (RAG) para responder perguntas sobre a 
+EstudaMais.tech e GitHub Student Pack com base em documentação indexada.
+"""
+import os
+import re
 import sys
 
-sys.path.append("./langchain_core")
-from logger import info, warning, error
-from dotenv import load_dotenv
-import os
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-import re
+from pydantic import BaseModel, SecretStr
+from dotenv import load_dotenv
 
-# Importações da LangChain
+# Importações LangChain
 from langchain_openai import OpenAIEmbeddings, ChatOpenAI
 from langchain_community.vectorstores import Chroma
 from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
+
+# Importações locais
+sys.path.append("./langchain_core")
+from logger import info, warning, error
 
 # Define SYSTEM_PROMPT
 SYSTEM_TEMPLATE = """
@@ -59,7 +67,15 @@ vectordb = Chroma(embedding_function=embeddings, persist_directory="./chroma_db"
 
 # Função de extração de keywords
 def extract_keywords(text: str) -> list[str]:
-    # pega só caracteres alfanuméricos separados
+    """
+    Extrai palavras-chave de um texto, retornando apenas caracteres alfanuméricos.
+    
+    Args:
+        text: Texto a ser processado
+        
+    Returns:
+        Lista de palavras-chave extraídas em minúsculas
+    """
     return re.findall(r"\w+", text.lower())
 
 
@@ -78,6 +94,9 @@ app.add_middleware(
 
 
 class ChatRequest(BaseModel):
+    """
+    Modelo para requisição de chat, contendo a mensagem do usuário.
+    """
     message: str
 
 
@@ -87,6 +106,16 @@ llm_chain = LLMChain(llm=chat_model, prompt=SYSTEM_PROMPT)
 
 # Nova função para gerar resposta usando LLMChain diretamente
 def gera_resposta_com_langchain(docs_and_scores: list, query: str) -> str:
+    """
+    Gera resposta usando o LLMChain com base nos documentos relevantes encontrados.
+    
+    Args:
+        docs_and_scores: Lista de tuplas (documento, score) de relevância
+        query: Pergunta original do usuário
+        
+    Returns:
+        Texto da resposta gerada pelo modelo de linguagem
+    """
     # 1) Junte o conteúdo dos chunks
     context = "\n\n".join([doc.page_content for doc, _ in docs_and_scores])
 
@@ -98,6 +127,15 @@ def gera_resposta_com_langchain(docs_and_scores: list, query: str) -> str:
 
 @app.post("/chat")
 async def chat_endpoint(request: ChatRequest):
+    """
+    Endpoint de chat que recebe a mensagem do usuário e retorna uma resposta.
+    
+    Args:
+        request: Objeto contendo a mensagem do usuário
+        
+    Returns:
+        Dicionário com a resposta gerada
+    """
     query = request.message
     info(f"Recebida mensagem: {query[:50]}...")
     keywords = extract_keywords(query)
@@ -107,25 +145,24 @@ async def chat_endpoint(request: ChatRequest):
         matched_themes = set(keywords) & TEMAS
 
         docs_and_scores = []  # Initialize to ensure it's always defined
+        k_docs = 5  # Número de documentos a recuperar
 
         # 3.2 Monta o retriever condicionando o filtro
         if matched_themes:
             info(f"Temas correspondentes encontrados: {list(matched_themes)}")
             filter_kwargs = {"filter": {"tema": {"$in": list(matched_themes)}}}
-            retriever_search_kwargs = {**filter_kwargs, "k": 5}
+            retriever_search_kwargs = {**filter_kwargs, "k": k_docs}
             retriever = vectordb.as_retriever(search_kwargs=retriever_search_kwargs)
 
-            k_val = retriever.search_kwargs.get("k", 5)
-            current_filter = retriever.search_kwargs.get("filter")
+            # Obter valores para busca
             docs_and_scores = retriever.vectorstore.similarity_search_with_score(
-                query, k=k_val, filter=current_filter
+                query, k=k_docs, filter=retriever_search_kwargs.get("filter")
             )
         else:
             info("Nenhum tema correspondente encontrado, buscando sem filtro de tema.")
-            retriever = vectordb.as_retriever(search_kwargs={"k": 5})
-            k_val = retriever.search_kwargs.get("k", 5)
+            retriever = vectordb.as_retriever(search_kwargs={"k": k_docs})
             docs_and_scores = retriever.vectorstore.similarity_search_with_score(
-                query, k=k_val
+                query, k=k_docs
             )
 
         # 3.4 Se ainda estiver vazio E HOUVE TENTATIVA DE FILTRO, faz um fallback sem filtro
@@ -147,8 +184,8 @@ async def chat_endpoint(request: ChatRequest):
             warning(
                 "Nenhum documento encontrado para a query. Pergunta fora do escopo."
             )
-            with open("logs/perguntas_fora_do_escopo.log", "a") as f:
-                f.write(f"{query}\n")
+            with open("logs/perguntas_fora_do_escopo.log", "a", encoding="utf-8") as log_file:
+                log_file.write(f"{query}\n")
             # Empty docs_and_scores will result in empty context
         else:
             info(
@@ -161,6 +198,9 @@ async def chat_endpoint(request: ChatRequest):
 
         return {"answer": response_content}
 
-    except Exception as e:
-        error(f"Erro ao gerar resposta: {str(e)}", exc_info=True)
+    except (ValueError, KeyError, IOError) as specific_error:
+        error(f"Erro ao gerar resposta: {str(specific_error)}", exc_info=True)
         return {"answer": "Desculpe, ocorreu um erro ao processar sua mensagem."}
+    except Exception as general_error:  # Ainda mantém o handler genérico para segurança
+        error(f"Erro inesperado: {str(general_error)}", exc_info=True)
+        return {"answer": "Desculpe, ocorreu um erro interno ao processar sua mensagem."}

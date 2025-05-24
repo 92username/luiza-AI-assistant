@@ -30,10 +30,10 @@ def load_docs():
         if filename.endswith(".md"):
             file_path = os.path.join(folder, filename)
             try:
-                with open(file_path, "r", encoding="utf-8") as f:
-                    combined += f.read() + "\n\n"
-            except (IOError, OSError, UnicodeDecodeError) as e:
+                with open(file_path, "r", encoding="utf-8") as file_handle:
+                    combined += file_handle.read() + "\n\n"
+            except (IOError, OSError, UnicodeDecodeError) as error:
                 # Specific exceptions instead of catching generic Exception
-                print(f"Erro ao ler o arquivo {filename}: {e}")
+                print(f"Erro ao ler o arquivo {filename}: {error}")
 
     return combined

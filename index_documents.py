@@ -1,7 +1,6 @@
-import os
-
 """
-Este script indexa documentos Markdown para um sistema de recuperação de texto usando Langchain e OpenAI.
+Este script indexa documentos Markdown para um sistema de recuperação de texto
+usando Langchain e OpenAI.
 
 O processo inclui:
 1. Carregamento de documentos Markdown do diretório ./docs
@@ -23,14 +22,16 @@ Uso:
     $ python index_documents.py
 
 Saída:
-    Os embeddings são armazenados no diretório ./chroma_index
+    Os embeddings são armazenados no diretório ./chroma_db
 """
+
+import os
 from dotenv import load_dotenv
-from langchain_community.document_loaders import DirectoryLoader  # Updated import
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain_community.vectorstores import Chroma  # Updated import
-from langchain_openai import OpenAIEmbeddings  # Updated import
-from pydantic import SecretStr  # Added import
+from langchain_community.document_loaders import DirectoryLoader
+from langchain_community.vectorstores import Chroma
+from langchain_openai import OpenAIEmbeddings
+from pydantic import SecretStr
 
 # Carregar variáveis do .env
 load_dotenv()
@@ -45,15 +46,15 @@ api_key_secret = SecretStr(api_key_str)  # Use SecretStr
 
 if __name__ == "__main__":
     # Carregar documentos da pasta /docs
-    docs_path = "./docs"
-    if not os.path.exists(docs_path):
+    DOCS_PATH = "./docs"
+    if not os.path.exists(DOCS_PATH):
         raise FileNotFoundError(
             "Pasta ./docs não encontrada. Crie a pasta e adicione arquivos .md."
         )
 
     print("📄 Carregando arquivos Markdown...")
     # 1.1 Carrega todos os .md de /docs
-    loader = DirectoryLoader(docs_path, glob="*.md")
+    loader = DirectoryLoader(DOCS_PATH, glob="*.md")
     raw_documents = loader.load()
 
     # Dividir os textos em pedaços menores
