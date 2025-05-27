@@ -1,19 +1,22 @@
-FROM python:3.10-slim
-
+# etapa 1: build e indexação
+FROM python:3.10-slim AS builder
 WORKDIR /app
 
-# Instala dependências do sistema
-RUN apt-get update && apt-get install -y build-essential
+# 1.1 Instala dependências
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Copia os arquivos do projeto
-COPY . /app
+# 1.2 Copia código e gera a base vetorial
+COPY . .
+RUN python index_documents.py
 
-# Instala dependências do Python
-RUN pip install --upgrade pip
-RUN pip install -r requirements.txt
+# etapa 2: imagem final mais enxuta
+FROM python:3.10-slim
+WORKDIR /app
 
-# Expõe a porta padrão da API
+# 2.1 Copia o resultado da indexação e o app
+COPY --from=builder /app /app
+
+# 2.2 Expõe porta e define entrypoint
 EXPOSE 8000
-
-# Comando para iniciar o servidor FastAPI com uvicorn
 CMD ["uvicorn", "luiza_fast_api:app", "--host", "0.0.0.0", "--port", "8000"]
