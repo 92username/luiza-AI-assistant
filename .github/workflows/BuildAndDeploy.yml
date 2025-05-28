@@ -47,8 +47,8 @@ jobs:
           context: .
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/luiza-backend:latest
-          build-args: |
-            OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
+          secrets: |
+            openai_api_key=${{ secrets.OPENAI_API_KEY }}
 
   deploy:
     runs-on: ubuntu-latest
