@@ -22,11 +22,11 @@ jobs:
 
       - name: Run Ruff
         run: |
-          ruff --verbose format || echo "⚠️ Ruff found issues, ignoring for now"
+          ruff --verbose format
 
       - name: Check formatting with Black
         run: |
-          black --check . || echo "⚠️ Black formatting diff, ignoring for now"
+          black --check .
 
   build-and-publish:
     runs-on: ubuntu-latest
