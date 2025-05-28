@@ -76,5 +76,5 @@ jobs:
               --name luiza_assistant \
               --restart unless-stopped \
               -p 8000:8000 \
-              -e OPENAI_API_KEY="${OPENAI_API_KEY}" \
+              -e OPENAI_API_KEY="${{ secrets.OPENAI_API_KEY }}" \
               ${{ secrets.DOCKER_USERNAME }}/luiza-backend:latest
