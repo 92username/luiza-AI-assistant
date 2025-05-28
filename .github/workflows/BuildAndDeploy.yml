@@ -40,6 +40,13 @@ jobs:
           registry: docker.io
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
+          
+      - name: Criar arquivo .env
+        run: |
+          cat <<EOF > .env
+          OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
+          # (adicione aqui as outras variáveis que seu index_documents.py exige)
+          EOF
 
       - name: Build & Push Docker image
         uses: docker/build-push-action@v4
