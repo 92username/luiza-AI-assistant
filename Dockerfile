@@ -8,6 +8,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # 1.2 Copia código e gera a base vetorial
 COPY . .
+ARG OPENAI_API_KEY
+ENV OPENAI_API_KEY=${OPENAI_API_KEY}
 RUN python index_documents.py
 
 # etapa 2: imagem final mais enxuta
