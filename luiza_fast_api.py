@@ -10,22 +10,20 @@ import os
 import re
 import sys
 
-# pylint: disable=wrong-import-position,wrong-import-order //
-
-# Third-party imports
-from dotenv import load_dotenv
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, SecretStr
-
 # Set path for local imports (needs to be before langchain imports)
 sys.path.append("./langchain_core")
 
+# Third-party imports
+from dotenv import load_dotenv  # noqa: E402
+from fastapi import FastAPI  # noqa: E402
+from fastapi.middleware.cors import CORSMiddleware  # noqa: E402
+from pydantic import BaseModel, SecretStr  # noqa: E402
+
 # LangChain imports
-from langchain.chains.llm import LLMChain
-from langchain.prompts import PromptTemplate
-from langchain_community.vectorstores import Chroma
-from langchain_openai import OpenAIEmbeddings, ChatOpenAI
+from langchain.chains.llm import LLMChain  # noqa: E402
+from langchain.prompts import PromptTemplate  # noqa: E402
+from langchain_community.vectorstores import Chroma  # noqa: E402
+from langchain_openai import OpenAIEmbeddings, ChatOpenAI  # noqa: E402
 
 # Local imports
 from logger import info, warning, error
@@ -34,9 +32,10 @@ from logger import info, warning, error
 SYSTEM_TEMPLATE = """
 Você é a Luiza, assistente virtual da EstudaMais.tech — motivadora, clara e sempre positiva.
 
-Utilize **apenas** as informações do contexto abaixo para formular sua resposta.  
+Utilize **apenas** as informações do contexto abaixo para formular sua resposta.
 Se a resposta não estiver no contexto, diga exatamente:
-"Não tenho essa informação no momento. Deseja perguntar algo relacionado à EstudaMais.tech ou ao GitHub Student Pack (GHSP)? 😊"
+"Não tenho essa informação no momento. Deseja perguntar algo relacionado à 
+EstudaMais.tech ou ao GitHub Student Pack (GHSP)? 😊"
 
 ==========
 {context}
@@ -92,9 +91,11 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173",
-                 "http://localhost:3000",
-                 "https://estudamais.tech"],
+    allow_origins=[
+        "http://localhost:5173",
+        "http://localhost:3000",
+        "https://estudamais.tech",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -197,7 +198,8 @@ async def chat_endpoint(request: ChatRequest):
         for doc, score in docs_and_scores:
             preview = doc.page_content[:100].replace("\n", " ")
             info(
-                f"Score: {score:.4f} | Tema: {doc.metadata.get('tema', 'N/A')} | Preview: {preview}"
+                f"Score: {score:.4f} | Tema: {doc.metadata.get('tema', 'N/A')} | "
+                f"Preview: {preview}"
             )
 
         # If no documents found after all attempts, log it.
@@ -212,7 +214,8 @@ async def chat_endpoint(request: ChatRequest):
             # Empty docs_and_scores will result in empty context
         else:
             info(
-                f"Contexto com {len(docs_and_scores)} documento(s) será usado para gerar resposta."
+                f"Contexto com {len(docs_and_scores)} documento(s) será usado "
+                f"para gerar resposta."
             )
 
         # Call the new function to generate response

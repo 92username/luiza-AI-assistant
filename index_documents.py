@@ -69,8 +69,10 @@ if __name__ == "__main__":
     # 2. Atribuir “tema” com base no nome do arquivo
     print("🏷️ Atribuindo metadados 'tema'...")
     for doc in documents:
-        src = doc.metadata["source"]  # ex: "docs/03-proposta-de-valor-e-mvp.md"
-        filename = os.path.basename(src)  # ex: "03-proposta-de-valor-e-mvp.md"
+        # ex: "docs/03-proposta-de-valor-e-mvp.md"
+        src = doc.metadata["source"]
+        # ex: "03-proposta-de-valor-e-mvp.md"
+        filename = os.path.basename(src)
         if filename.startswith("01-"):
             doc.metadata["tema"] = "visao-geral"
         elif filename.startswith("02-"):

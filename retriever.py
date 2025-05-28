@@ -26,10 +26,13 @@ try:
     from langchain_community.vectorstores import Chroma  # Updated import
 
 except ImportError:
-    error_msg = "Required packages not installed. Please run: pip install langchain-openai langchain-community langchain-core"  # Adjusted error message slightly
+    error_msg = (
+        "Required packages not installed. Please run: "
+        "pip install langchain-openai langchain-community langchain-core"
+    )  # Adjusted error message slightly
     try:
         error(error_msg)
-    except (NameError, AttributeError) as e:
+    except (NameError, AttributeError):
         # Exceções específicas para quando error() não está definido ou não é uma função
         print(f"Logging unavailable: {error_msg}")
     raise ImportError(error_msg)
@@ -46,12 +49,12 @@ def load_docs(query: str, k: int = 5, score_threshold: float = 0.65) -> List[Doc
     Args:
         query (str): The search query text.
         k (int, optional): Number of documents to retrieve initially. Defaults to 5.
-        score_threshold (float, optional): Minimum similarity score to consider a document relevant.
-                                           Defaults to 0.65.
+        score_threshold (float, optional): Minimum similarity score to consider a
+                                          document relevant. Defaults to 0.65.
 
     Returns:
-        List[Document]: A list of Document objects containing the most relevant text chunks
-                        that meet the score threshold.
+        List[Document]: A list of Document objects containing the most relevant text
+                       chunks that meet the score threshold.
 
     Raises:
         ValueError: If the OPENAI_API_KEY is not found in environment variables.
@@ -85,14 +88,16 @@ def load_docs(query: str, k: int = 5, score_threshold: float = 0.65) -> List[Doc
 
     if not filtered_docs:
         warning(
-            f"Nenhum documento acima do threshold ({score_threshold}) para a query: '{query}'"
+            f"Nenhum documento acima do threshold ({score_threshold}) "
+            f"para a query: '{query}'"
         )
         raise FileNotFoundError(
             f"Nenhum documento relevante com score >= {score_threshold}"
         )
 
     info(
-        f"Busca concluída. Encontrados {len(filtered_docs)} documentos relevantes após filtro (threshold={score_threshold})."
+        f"Busca concluída. Encontrados {len(filtered_docs)} documentos relevantes "
+        f"após filtro (threshold={score_threshold})."
     )
     return filtered_docs
 
