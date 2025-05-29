@@ -1,5 +1,3 @@
-# syntax=docker/dockerfile:1.4
-
 # etapa 1: build e indexação
 FROM python:3.10-slim AS builder
 ARG OPENAI_API_KEY
@@ -15,9 +13,12 @@ RUN --mount=type=secret,id=openai_api_key \
     OPENAI_API_KEY="$(cat /run/secrets/openai_api_key)" \
     python index_documents.py
 
-# etapa 2: imagem final mais enxuta
-FROM python:3.13-slim
-COPY --from=builder /app /app
+# etapa 2: final
+FROM python:3.10-slim
 WORKDIR /app
+# 1) Copia dependências instaladas
+COPY --from=builder /usr/local/lib/python3.10/site-packages /usr/local/lib/python3.10/site-packages
+# 2) Copia o código e artefatos de indexação
+COPY --from=builder /app /app
 EXPOSE 8000
-ENTRYPOINT ["python","-m","uvicorn","luiza_fastapi:app","--host","0.0.0.0","--port","8000"]
+CMD ["uvicorn","luiza_fast_api:app","--host","0.0.0.0","--port","8000"]
