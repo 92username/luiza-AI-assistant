@@ -12,5 +12,5 @@ COPY . .
 # Expõe a porta padrão do Uvicorn
 EXPOSE 8000
 
-# Inicia o serviço com Uvicorn
+# Inicia o serviço com Uvicorn #
 CMD ["uvicorn", "luiza_fast_api:app", "--host", "0.0.0.0", "--port", "8000"]
